@@ -1,6 +1,10 @@
+
+//const Parser = require('@json2csv/plainjs');
 const { json } = require('body-parser');
 const express = require('express')
 const app = express()
+
+
 
 app.use(express.json())
 
@@ -30,19 +34,27 @@ function combineURL(ID) {
 
 let urls = dataToAPI.map(combineURL);
 let i = 0;
-  setInterval( () => {
-    console.log("ennen fetchia")
+
+const myInterval = setInterval( () => {
       fetchAPI(urls[i])
+    
     i++;
-    console.log("here")
-  }, 200);
+    if(i === dataToAPI.length + 1){
+        stopInterval();
+    }
+  }, 1000);
+
+
+function stopInterval() {
+  clearInterval(myInterval);
+}
 
     
 function fetchAPI(apiFetch){
     fetch(apiFetch).then(function(response) {
         return response.json();
     }).then(function(data) {
-      console.log(data)
+      //console.log(data)
         showResults(data)            				
     }).catch(function(error){    
         console.log(error);            
@@ -57,6 +69,17 @@ newData.push(jsonData.results[0].registedOffices[0].name);
 //    newData.push(jsonData.results[0].addresses[0].street + " " + jsonData.results[0].addresses[0].postCode + " " + jsonData.results[0].addresses[0].city)
 }
 
+/*
+try {
+  const opts = {};
+  const parser = new Parser(opts);
+  const csv = parser.parse(newData);
+  console.log(csv);
+} catch (err) {
+  console.error(err);
+}
+*/
+
 app.get('/', (req, res) => {
 res.json(newData)
 })
@@ -66,7 +89,6 @@ app.listen(PORT, () => {
 console.log(`Server running on port ${PORT}`)
 })
 
-  // tee lopetus ettei jatka pyörittämistä
   // testaa millä ms etenee
   //lataa kirjasto json to excel
   // luo array itemeistä objektit
