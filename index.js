@@ -21,9 +21,7 @@ const dataToAPI = [
   '0127485-5',
   '0974176-1',
   '2544336-9',
-  '2399345-5',
-  '0124461-3',
-  '0203107-0'
+  '2399345-5' 
   ];
 
   //combine apiurl with specific ID
@@ -40,7 +38,7 @@ const myInterval = setInterval( () => {
     fetchAPI(urls[i])  
     i++;
     //stop looping after all id's have been gone through
-    if(i === dataToAPI.length + 1){
+    if(i === dataToAPI.length){
         stopInterval();
         //console.log(myJSON, "objekti")
 
@@ -55,7 +53,7 @@ const myInterval = setInterval( () => {
         }
 
     }
-  }, 1000);
+  }, 500);
 
 
 function stopInterval() {
