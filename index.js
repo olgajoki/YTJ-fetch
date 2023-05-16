@@ -3,15 +3,15 @@
 const { json } = require('body-parser');
 const express = require('express')
 const app = express()
-
-
+const fs = require('fs');
 
 app.use(express.json())
 
-let newData = [];
+let IDArray = [];
+let cityArray = [];
 let wholeURL;
-let array = [];
 const apiurl = 'http://avoindata.prh.fi/bis/v1/?businessId=';
+let arrayObject = {};
 
 const dataToAPI = [
   '1532726-8',
@@ -26,7 +26,7 @@ const dataToAPI = [
   '0203107-0'
   ];
 
-  //combine 
+  //combine apiurl with specific ID
 function combineURL(ID) {
   wholeURL = apiurl+ID;
   return wholeURL;
@@ -36,11 +36,24 @@ let urls = dataToAPI.map(combineURL);
 let i = 0;
 
 const myInterval = setInterval( () => {
-      fetchAPI(urls[i])
     
+    fetchAPI(urls[i])  
     i++;
+    //stop looping after all id's have been gone through
     if(i === dataToAPI.length + 1){
         stopInterval();
+        //console.log(myJSON, "objekti")
+
+        //write to file when all id's have been gone through
+        const myJSON = JSON.stringify(arrayObject);
+        try {
+          fs.writeFileSync('/Users/FIX2OLJO/FullStackOpen/apitesti/test.csv', myJSON);
+          // file written successfully
+        
+        } catch (err) {
+          console.error(err);
+        }
+
     }
   }, 1000);
 
@@ -49,12 +62,12 @@ function stopInterval() {
   clearInterval(myInterval);
 }
 
-    
+//fetch each api
 function fetchAPI(apiFetch){
+
     fetch(apiFetch).then(function(response) {
         return response.json();
     }).then(function(data) {
-      //console.log(data)
         showResults(data)            				
     }).catch(function(error){    
         console.log(error);            
@@ -63,13 +76,25 @@ function fetchAPI(apiFetch){
 }
 
 function showResults(jsonData) {   
-// console.log(jsonData) 
-newData.push(jsonData.results[0].businessId);
-newData.push(jsonData.results[0].registedOffices[0].name);
-//    newData.push(jsonData.results[0].addresses[0].street + " " + jsonData.results[0].addresses[0].postCode + " " + jsonData.results[0].addresses[0].city)
+  try{
+    //push ID and city to own arrays
+    IDArray.push(jsonData.results[0].businessId);
+    cityArray.push(jsonData.results[0].registedOffices[0].name);
+    //    newData.push(jsonData.results[0].addresses[0].street + " " + jsonData.results[0].addresses[0].postCode + " " + jsonData.results[0].addresses[0].city)
+     
+    // Using loop to insert key
+    // value in Object
+    for(let i = 0; i < IDArray.length; i++){
+        arrayObject[IDArray[i]] = cityArray[i];
+    }
+  }
+    catch(err){
+      console.error("id not found");
+    }
 }
 
-/*
+/* 
+//use parser for json to csv
 try {
   const opts = {};
   const parser = new Parser(opts);
@@ -80,6 +105,8 @@ try {
 }
 */
 
+/*
+//server
 app.get('/', (req, res) => {
 res.json(newData)
 })
@@ -89,7 +116,5 @@ app.listen(PORT, () => {
 console.log(`Server running on port ${PORT}`)
 })
 
-  // testaa millä ms etenee
-  //lataa kirjasto json to excel
-  // luo array itemeistä objektit
-  // write to file lopussa
+*/
+
